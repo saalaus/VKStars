@@ -1,27 +1,30 @@
+
 from database import Session
 from database.schemas.user import User
-from loader import config
-from utils.filters import (filter_comment_add, filter_like_add, filter_post,
-                           filter_repost, filter_subscribe)
+from loader import config, logger
+from utils.filters import filter_comment_add, filter_like_add, filter_post, \
+    filter_repost, filter_subscribe
 from vk.api import method
 from vk.execute import ExecuteCode
 
 
-def get_all_members(group_id):
-    """Yield all members count"""
+def filter_all_members(session):
+    """Yield all members"""
     offset = 0
     end = False
 
     while not end:
-        params = {"group_id": group_id, "offset": offset}
         members = method("execute",
-                         code=ExecuteCode.get_members.value % params
+                         code=ExecuteCode.get_members.value,
+                         group_id = config.group.id*-1,
+                         offset = offset
                          )["response"]
 
         end = members["end"]
         for member in members["items"]:
-            yield member
+            filter_subscribe(session, member)
         offset += 25_000
+        
 
 
 def scan_posts(session):
@@ -117,13 +120,9 @@ def get_thread_comment(session, comment_id):
 
 
 def main():
-    session = Session()
-    count = 0
-    scan_posts(session)
-    session.commit()
-    session.close()
-    print("КОЛВО:", count)
-
-
+    with Session() as session:
+        filter_all_members(session)
+        scan_posts(session)
+        session.commit()
 if __name__ == "__main__":
     main()

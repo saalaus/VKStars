@@ -1,9 +1,9 @@
 """Get 25 000 members on one execute
 Params: group_id, offset"""
 code = """
-var group_id = %(group_id)d;
+var group_id = Args.group_id;
 var i = 0;
-var offset = %(offset)d;
+var offset = parseInt(Args.offset);
 var members = [];
 var all_count = 0;
 while (i < 25){
@@ -18,5 +18,5 @@ var end = false;
 if (offset >= all_count){
     end = true;
 }
-return {"count": members.length, "all_count": all_count, "end": end, "items": members};
+return {"end": end, "items": members};
 """

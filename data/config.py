@@ -33,6 +33,7 @@ class Config:
     user_token: str
     api_version: float
     last_request: float = 0.0
+    database_string: str = "sqlite:///test.db"
 
 
 def make_config(user_token,
@@ -50,7 +51,8 @@ def make_config(user_token,
                 score_for_subscribe,
                 confirmation_string=None,
                 server_secret_key=None,
-                ignore_users=None
+                ignore_users=None,
+                database_string="sqlite:///test.db"
                 ) -> Config:
     scores = Scores(score_for_like, score_for_repost, score_for_post,
                     score_for_comment, score_for_thread_comment,
@@ -59,4 +61,5 @@ def make_config(user_token,
                   meaningful_comments_min_length, ignore_users)
     group = Group(group_id, widget_token, confirmation_string,
                   server_secret_key)
-    return Config(group, table, user_token, api_version)
+    return Config(group, table, user_token, api_version,
+                  database_string=database_string)

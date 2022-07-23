@@ -9,9 +9,8 @@ config = make_config(const.USER_TOKEN, const.API_VERSION, const.GROUP_ID,
                      const.FOR_REPOST, const.FOR_POST, const.FOR_COMMENT,
                      const.FOR_THREAD_COMMENT, const.FOR_SUBSCRIBE,
                      const.CONFIRMATION_STRING, const.SERVER_SECRET_KEY,
-                     const.IGNORES_USERS)
+                     const.IGNORES_USERS, const.DATABASE_STRING)
 
-logging.basicConfig(level=logging.CRITICAL)
+logging.basicConfig(level=logging.DEBUG,
+                    format='[%(levelname)s] [%(asctime)s]: %(message)s')
 logger = logging.getLogger("vkstars")
-logger.setLevel(logging.DEBUG)
-

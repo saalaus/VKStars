@@ -1,7 +1,9 @@
+import sqlalchemy as sa
 from sqlalchemy.sql.expression import desc
 from sqlalchemy.sql.functions import func
+
 from .base import BaseModel
-import sqlalchemy as sa
+
 
 class User(BaseModel):
     id = sa.Column(sa.Integer, primary_key=True)
@@ -14,12 +16,27 @@ class User(BaseModel):
         return user
 
     @classmethod
-    def get_top_10(cls, session):
+    def get_top_10(cls, session) -> list[list[int, int]]:
+        """Get top 10 users
+           return list [[id, score], [id, score], ...] 
+        """
         users = session.query(cls).order_by(desc(cls.score)).limit(10)
-        return [[user.id, user.score] for user in users]
+        return [ [user.id, user.score] for user in users]
 
     @classmethod
-    def get_all(cls, session):
+    def get_all(cls, session) -> dict[str, str]:
+        """Get all users
+        return dict {id: score}
+        """
         places = func.row_number().over(order_by=desc(cls.score)).label("place")
-        users = session.execute(session.query(cls).add_column(places))
-        return {str(user[0].id): str(user[0].score)+" "+str(user[1]) for user in users}
+        users: list[tuple["User", int]] = (
+            session
+            .query(cls)
+            .order_by(desc(cls.score))
+            .limit(1000)
+            .add_column(places)
+            )
+        return {
+            str(user.id): f"{user.score}_{place}"
+            for user, place in users
+            }
