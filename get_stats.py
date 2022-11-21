@@ -1,7 +1,7 @@
 
 from database import Session
 from database.schemas.user import User
-from loader import config, logger
+from data import settings
 from utils.filters import filter_comment_add, filter_like_add, filter_post, \
     filter_repost, filter_subscribe
 from vk.api import method
@@ -16,7 +16,7 @@ def filter_all_members(session):
     while not end:
         members = method("execute",
                          code=ExecuteCode.get_members.value,
-                         group_id = config.group.id*-1,
+                         group_id = settings.GROUP_ID,
                          offset = offset
                          )["response"]
 
@@ -30,7 +30,7 @@ def filter_all_members(session):
 def scan_posts(session):
     print("Сканирование стены...")
     offset = 0
-    posts = method("wall.get", owner_id=config.group.id,
+    posts = method("wall.get", owner_id=settings.GROUP_ID*-1,
                    offset=0, count=100)
     all_count = posts["response"]["count"]
     count = 1
@@ -48,14 +48,14 @@ def scan_posts(session):
                 get_reposts(session, post_id)
             if post.get("signer_id"):
                 filter_post(session, post["signer_id"])
-        posts = method("wall.get", owner_id=config.group.id,
+        posts = method("wall.get", owner_id=settings.GROUP_ID*-1,
                        offset=offset, count=100)
     print("Сканирование стены завершено")
 
 
 def get_likes(session, post_id):
     offset = 0
-    post = method("likes.getList", type="post", owner_id=config.group.id,
+    post = method("likes.getList", type="post", owner_id=settings.GROUP_ID*-1,
                   item_id=post_id, filter="likes", offset=0, count=100)
     all_count = post["response"]["count"]
     count = 1
@@ -65,13 +65,14 @@ def get_likes(session, post_id):
             print("    Сканирование лайков: ", count, "Из", all_count)
             filter_like_add(session, like)
             count += 1
-        post = method("likes.getList", type="post", owner_id=config.group.id,
-                      item_id=post_id, filter="likes", offset=offset, count=100)
+        post = method("likes.getList", type="post",
+                      owner_id=settings.GROUP_ID*-1, item_id=post_id,
+                      filter="likes", offset=offset, count=100)
 
 
 def get_reposts(session, post_id):
     offset = 0
-    post = method("wall.getReposts", owner_id=config.group.id,
+    post = method("wall.getReposts", owner_id=settings.GROUP_ID*-1,
                   post_id=post_id, offset=0, count=100)
     count = 1
     while post["response"]["items"]:
@@ -80,13 +81,13 @@ def get_reposts(session, post_id):
             print("    Сканирование репостов: ", count)
             count += 1
             filter_repost(session, repost.get("from_id"))
-        post = method("wall.getReposts", owner_id=config.group.id,
+        post = method("wall.getReposts", owner_id=settings.GROUP_ID*-1,
                       post_id=post_id, offset=offset, count=100)
 
 
 def get_comments(session, post_id):
     offset = 0
-    post = method("wall.getComments", owner_id=config.group.id,
+    post = method("wall.getComments", owner_id=settings.GROUP_ID*-1,
                   post_id=post_id, offset=0, count=100, need_likes=True)
     all_count = post["response"]["count"]
     count = 1
@@ -98,13 +99,14 @@ def get_comments(session, post_id):
             if comment["thread"]["count"]:
                 get_thread_comment(session, comment["id"])
         offset += 100
-        post = method("wall.getComments", owner_id=config.group.id, post_id=post_id,
-                      offset=offset, count=100, need_likes=True)
+        post = method("wall.getComments", owner_id=settings.GROUP_ID*-1,
+                      post_id=post_id, offset=offset, count=100,
+                      need_likes=True)
 
 
 def get_thread_comment(session, comment_id):
     offset = 0
-    post = method("wall.getComments", owner_id=config.group.id, offset=0,
+    post = method("wall.getComments", owner_id=settings.GROUP_ID*-1, offset=0,
                   count=100, comment_id=comment_id, need_likes=True)
     all_count = post["response"]["count"]
     count = 1
@@ -115,7 +117,7 @@ def get_thread_comment(session, comment_id):
             print("        Сканирование треда: ", count, "Из", all_count)
             filter_comment_add(session, comment["from_id"], comment["text"], in_thread=True)
             count += 1
-        post = method("wall.getComments", owner_id=config.group.id, offset=offset,
+        post = method("wall.getComments", owner_id=settings.GROUP_ID*-1, offset=offset,
                       count=100, comment_id=comment_id, need_likes=True)
 
 

@@ -1,8 +1,10 @@
 import threading
 
-from loader import logger
 from vk.update_widget import update_every_seconds
 from web_app.callback import app
+import logging
+
+logger = logging.getLogger("VKStars")
 
 def main():
     logger.info("Start thread for update widget")

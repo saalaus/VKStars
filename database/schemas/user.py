@@ -16,7 +16,7 @@ class User(BaseModel):
         return user
 
     @classmethod
-    def get_top_10(cls, session) -> list[list[int, int]]:
+    def get_top_10(cls, session) -> list[list[int]]:
         """Get top 10 users
            return list [[id, score], [id, score], ...] 
         """
