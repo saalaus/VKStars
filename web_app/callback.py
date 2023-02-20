@@ -1,12 +1,21 @@
 import json
 
-from database import Session
 from flask import Flask, request
+
 from data import settings
-from utils.filters import filter_comment_add, filter_comment_delete, \
-    filter_like_add, filter_like_remove, filter_post, filter_repost,\
-    filter_subscribe, filter_unsubscribe, filter_post_delete,\
-    filter_repost_delete
+from database import Session
+from utils.filters import (
+    filter_comment_add,
+    filter_comment_delete,
+    filter_like_add,
+    filter_like_remove,
+    filter_post,
+    filter_post_delete,
+    filter_repost,
+    filter_repost_delete,
+    filter_subscribe,
+    filter_unsubscribe,
+)
 
 app = Flask(__name__)
 
@@ -15,10 +24,9 @@ app = Flask(__name__)
 def index():
     if not request.data:
         return 'ok'
+    data = json.loads(request.data)
     if not data.get("secret") == settings.SERVER_SECRET_KEY:
         return 'ok'
-    data = json.loads(request.data)
-
     session = Session()
     event_dict = {
         "confirmation": lambda _: settings.CONFIRMATION_STRING,
@@ -38,12 +46,12 @@ def index():
     event_type = data.get("type")
     func = event_dict.get(event_type)
     if not func:
-        # logger.error(f"No handler for {event_type}")
+        logger.error(f"No handler for {event_type}")
         return "ok"
-    # logger.info(f"Run handler {event_type}")
+    logger.info(f"Run handler {event_type}")
     return_data = func(data["object"])
 
     session.commit()
     session.close()
-    # logger.info(f"Return {return_data}")
+    logger.info(f"Return {return_data}")
     return 'ok' if not return_data else return_data

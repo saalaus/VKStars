@@ -19,4 +19,5 @@ class BaseModel:
         value_str = " ".join(f"{name}={value!r}" for name, value in values.items())
         return f"<{model} {value_str}>"
 
+
 BaseModel = declarative_base(cls=BaseModel)

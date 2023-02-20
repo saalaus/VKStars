@@ -1,4 +1,3 @@
-
 from database import Session
 from database.schemas.user import User
 from data import settings
@@ -16,15 +15,14 @@ def filter_all_members(session):
     while not end:
         members = method("execute",
                          code=ExecuteCode.get_members.value,
-                         group_id = settings.GROUP_ID,
-                         offset = offset
+                         group_id=settings.GROUP_ID,
+                         offset=offset
                          )["response"]
 
         end = members["end"]
         for member in members["items"]:
             filter_subscribe(session, member)
         offset += 25_000
-        
 
 
 def scan_posts(session):
@@ -115,7 +113,8 @@ def get_thread_comment(session, comment_id):
         all_count = post["response"]["count"]
         for comment in post["response"]["items"]:
             print("        Сканирование треда: ", count, "Из", all_count)
-            filter_comment_add(session, comment["from_id"], comment["text"], in_thread=True)
+            filter_comment_add(
+                session, comment["from_id"], comment["text"], in_thread=True)
             count += 1
         post = method("wall.getComments", owner_id=settings.GROUP_ID*-1, offset=offset,
                       count=100, comment_id=comment_id, need_likes=True)
@@ -126,5 +125,7 @@ def main():
         filter_all_members(session)
         scan_posts(session)
         session.commit()
+
+
 if __name__ == "__main__":
     main()
