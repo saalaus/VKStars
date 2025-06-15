@@ -1,27 +1,68 @@
 # VKStars
 
-Баллы за активность в группе вконтакте
+Reward points for activity in a VKontakte group
 
-## Как это будет выглядеть
-Если пользователь находится в топ 10
+## Features
+- Award points for: posts, likes, reposts, comments, subscriptions  
+- “Leaderboard” widget in the group  
+- Top 10 display + personal score view
 
-![Screenshot](docs/1.jpg)
+## Screenshots
+If you’re in the top 10:  
+![Top 10 widget](docs/1.jpg)  
 
-Если пользователь не находится в топ 10
+If you’re outside the top 10:  
+![Member widget](docs/2.JPG)  
 
-![Screenshot](docs/2.JPG)
+If no record:  
+![No data](docs/3.JPG)  
 
-Если пользователя нет в базе данных
+## Requirements
+- Python 3.8+  
+- Libraries listed in `requirements.txt`
 
-![Screenshot](docs/3.JPG)
-## Использование
+## Installation
+1. Clone the repository  
+2. Enter project directory  
+3. Install dependencies  
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-Устанавливаем зависимости
+## Configuration
+In `data/settings.py`, set:
+- `USER_TOKEN`, `WIDGET_TOKEN` — VK tokens
+- `GROUP_ID` — VK group ID
+- `CONFIRMATION_STRING`, `SERVER_SECRET_KEY` — for callback server
+- Points per action (`FOR_LIKE`, `FOR_POST`, etc.)
 
-`pip install -r requirements.txt`
+## Usage
+1. Gather stats and fill the database:
+   ```bash
+   python get_stats.py
+   ```
+2. Run the app:
+   ```bash
+   python app.py
+   ```
+   - starts Flask server and updates widget every 5 minutes.
 
-В файле `data/const.py` настраиваем значения
-
-Запускаем `python get_stats.py` для сбора статистики группы
-
-Запускаем `python app.py` для старта приложения
+Project Structure
+```
+├── data/
+│   └── settings.py
+├── database/
+│   ├── schemas/      # SQLAlchemy models
+│   └── db.py
+├── utils/
+│   ├── filters.py    # point calculation logic
+│   └── vk_exceptions.py
+├── vk/
+│   ├── api.py        # VK API calls
+│   ├── execute/      # code for execute-method requests
+│   └── update_widget.py
+├── web_app/          # Flask callback for VK events
+├── get_stats.py      # imports users, posts, likes, reposts, comments
+├── app.py            # server launch & widget updater
+└── docs/             # screenshots for README
+```
